@@ -1,91 +1,37 @@
-// src/app/page.tsx
-'use client';
-import { useState, useEffect } from 'react';
-
 export default function Home() {
-  const [count, setCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  // Lade Counter (mit Cache-Buster: ?t=Timestamp)
-  const fetchCount = async () => {
-    const res = await fetch('/api/counter?t=' + Date.now());
-    const data = await res.json();
-    setCount(data.count);
-  };
-
-  // Initial laden
-  useEffect(() => {
-    fetchCount();
-  }, []);
-
-  // POST → +1 + sofort refresh
-  const increment = async () => {
-    setLoading(true);
-    try {
-      await fetch('/api/counter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      // Sofort neu laden (Cache umgehen)
-      fetchCount();
-    } catch (err) {
-      console.error("Fehler:", err);
-    }
-    setLoading(false);
-  };
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'system-ui, sans-serif',
-      background: '#f7f7f7',
-      padding: '2rem'
-    }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#0070f3' }}>
-        Vercel Blob Counter
-      </h1>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* VIDEO HINTERGRUND */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/videos/bg.mp4" type="video/mp4" />
+        Ihr Browser unterstützt kein Video.
+      </video>
 
-      <div style={{
-        background: 'white',
-        padding: '2rem',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        textAlign: 'center',
-        minWidth: '300px'
-      }}>
-        <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
-          Aktueller Zähler:
-        </p>
-        <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0070f3' }}>
-          {count === null ? 'Lade...' : count}
-        </p>
+      {/* DUNKLER OVERLAY für bessere Lesbarkeit */}
+      <div className="fixed inset-0 bg-black opacity-50 z-10"></div>
 
-        <button
-          onClick={increment}
-          disabled={loading}
-          style={{
-            marginTop: '1.5rem',
-            padding: '1rem 2rem',
-            fontSize: '1.3rem',
-            background: loading ? '#ccc' : '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          {loading ? 'Speichert...' : '+1'}
-        </button>
-      </div>
-
-      <p style={{ marginTop: '2rem', color: '#666', fontSize: '0.9rem' }}>
-        Jeder Klick speichert global im Vercel Blob Store
-      </p>
+      {/* INHALT */}
+      <main className="relative z-20 min-h-screen flex items-center justify-center p-8">
+        <div className="text-center">
+          <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 animate-pulse drop-shadow-2xl">
+            Hallo Welt
+          </h1>
+          <p className="text-xl md:text-2xl text-cyan-300 font-light drop-shadow-lg">
+            Mein erstes Next.js 16 Projekt mit Video-Hintergrund!
+          </p>
+          <div className="mt-8">
+            <div className="inline-block animate-bounce">
+              <span className="text-6xl">⚔️</span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
