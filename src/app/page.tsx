@@ -6,26 +6,30 @@ export default function Home() {
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Lade Counter beim Start
+  // Lade Counter (mit Cache-Buster: ?t=Timestamp)
+  const fetchCount = async () => {
+    const res = await fetch('/api/counter?t=' + Date.now());
+    const data = await res.json();
+    setCount(data.count);
+  };
+
+  // Initial laden
   useEffect(() => {
-    fetch('/api/counter')
-      .then(res => res.json())
-      .then(data => setCount(data.count))
-      .catch(() => setCount(0));
+    fetchCount();
   }, []);
 
-  // POST → +1
+  // POST → +1 + sofort refresh
   const increment = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/counter', {
+      await fetch('/api/counter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      const data = await res.json();
-      setCount(data.count);
+      // Sofort neu laden (Cache umgehen)
+      fetchCount();
     } catch (err) {
-      console.error("Fehler beim Hochzählen:", err);
+      console.error("Fehler:", err);
     }
     setLoading(false);
   };
