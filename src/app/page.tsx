@@ -1,77 +1,87 @@
 // src/app/page.tsx
 'use client';
-
 import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [count1, setCount1] = useState(0);
-  const [count2, setCount2] = useState(0);
-  const [globalCount, setGlobalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [count, setCount] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Lade globalen Counter
+  // Lade Counter beim Start
   useEffect(() => {
     fetch('/api/counter')
       .then(res => res.json())
-      .then(data => {
-        setGlobalCount(data.count);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      .then(data => setCount(data.count))
+      .catch(() => setCount(0));
   }, []);
 
-  const clickButton1 = async () => {
-    setCount1(count1 + 1);
-    const res = await fetch('/api/counter', { method: 'POST' });
-    const data = await res.json();
-    setGlobalCount(data.count);
-  };
-
-  const clickButton2 = async () => {
-    setCount2(count2 + 1);
-    const res = await fetch('/api/counter', { method: 'POST' });
-    const data = await res.json();
-    setGlobalCount(data.count);
+  // POST → +1
+  const increment = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/counter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      setCount(data.count);
+    } catch (err) {
+      console.error("Fehler beim Hochzählen:", err);
+    }
+    setLoading(false);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-8">
-      <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-lg w-full text-center transform transition hover:scale-105">
-        <h1 className="text-5xl font-bold text-gray-800 mb-6">
-          Hallo, Lehnsherr! 👑
-        </h1>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'system-ui, sans-serif',
+      background: '#f7f7f7',
+      padding: '2rem'
+    }}>
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#0070f3' }}>
+        Vercel Blob Counter
+      </h1>
 
-        <p className="text-lg text-gray-600 mb-6">
-          Deine <span className="font-bold text-purple-600">Next.js 16</span> Seite ist <span className="text-green-600">LIVE</span>!
+      <div style={{
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        minWidth: '300px'
+      }}>
+        <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+          Aktueller Zähler:
+        </p>
+        <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#0070f3' }}>
+          {count === null ? 'Lade...' : count}
         </p>
 
-        {/* GLOBALER COUNTER */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-2xl text-white">
-          <p className="text-sm font-semibold uppercase">Ewiger Klecks-Counter</p>
-          <p className="text-4xl font-bold">
-            {loading ? '...' : globalCount.toLocaleString()}
-          </p>
-          <p className="text-xs mt-1">Gespeichert in Vercel Blob – für immer!</p>
-        </div>
-
         <button
-          onClick={clickButton1}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xl py-4 px-10 rounded-full transition transform hover:-translate-y-1 active:scale-95 shadow-lg mb-4 block w-full"
+          onClick={increment}
+          disabled={loading}
+          style={{
+            marginTop: '1.5rem',
+            padding: '1rem 2rem',
+            fontSize: '1.3rem',
+            background: loading ? '#ccc' : '#0070f3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: 'bold'
+          }}
         >
-          Button 1: <span className="ml-2">{count1}</span>
+          {loading ? 'Speichert...' : '+1'}
         </button>
-
-        <button
-          onClick={clickButton2}
-          className="bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white font-bold text-xl py-4 px-10 rounded-full transition transform hover:-translate-y-1 active:scale-95 shadow-lg block w-full"
-        >
-          Button 2: <span className="ml-2">{count2}</span>
-        </button>
-
-        <p className="mt-8 text-sm text-gray-500">
-          Bereit für <span className="font-bold">Vercel Deploy</span> ⚡
-        </p>
       </div>
-    </main>
+
+      <p style={{ marginTop: '2rem', color: '#666', fontSize: '0.9rem' }}>
+        Jeder Klick speichert global im Vercel Blob Store
+      </p>
+    </div>
   );
 }
